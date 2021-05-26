@@ -95,6 +95,7 @@ class player():
         self.tp=0
         self.sp=0
         self.bag={}
+        #wears of a player
         self.wears={'左臂':None,
         '右臂':weapon('木棒',1,'cross',description='test'),
         '左腿':None,
@@ -103,7 +104,7 @@ class player():
         '头':None,
         '内脏':None,
         '灵魂':None}
-
+        #body parts of a player
         self.body={'左臂':organ('左臂',{'ATK':1}),
         '右臂':organ('右臂',{'ATK':1}),
         '左腿':organ('左腿',{'AGI':1}),
@@ -216,3 +217,32 @@ print(a.equipment_info())
 # print(type(a))
 print(a.wears['躯干'].getDescription())
 print(a.organ_stats('躯干'))
+
+class block():
+    def __init__(self,name,accessable,cate,hold=[]):
+        self.name=name
+        #whether a block can be reached
+        self.accessable=accessable
+        #category
+        self.cate=cate
+        #the characters(id) on this block
+        self.hold=hold
+
+class world_block(block):
+    def __init__(self,name,accessable,hold=[]):
+        block.__init__(self,name,accessable,hold,cate='big')
+
+class map_block(block):
+    def __init__(self,name,accessable,hold=[]):
+        block.__init__(self,name,accessable,hold,cate='small')
+
+class map_grid():
+    def __init__(self,length,cate):
+        self.length=length
+        #grid contains block
+        self.grid=[[None for i in range(length)] for j in range(length)]
+        self.cate=cate
+    def get_block(self,x,y):
+        if x<self.length and y<self.length:
+            return self.grid[y][x]
+        return self.grid[0][0]
