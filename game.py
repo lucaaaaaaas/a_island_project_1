@@ -114,6 +114,10 @@ class player():
         '内脏':organ('内脏',{'MAT':1,'DEF':1,'MDE':1}),
         '灵魂':organ('灵魂',{'MAT':1,'LUK':3})}
         self.stats=initial_stats()
+        #position of a player
+        self.map_pos=[0,0]
+        #position of a player on a certain map
+        self.world_pos=[0,0]
     
     def organ_stats(self,o):
         s={}
@@ -170,6 +174,13 @@ class player():
         s+='当前等级所需经验：'+str((100+(self.level%10-1)*10)*2**(self.level//10))+'\n'
         return s
 
+    def bag_info(self):
+        s=''
+        for key in self.bag.keys():
+            if self.bag[key]>0:
+                s+='名称：'+key+'，个数：'+str(self.bag[key])+'\n'
+        return s
+
     def level_up(self):
         cost=(100+(self.level%10-1)*10)*2**(self.level//10)
         if self.exp>=cost:
@@ -190,7 +201,7 @@ class player():
         else:
             return False
 
-    def add_item(self,i,num):
+    def add_item(self,i,num=1):
         if i in self.bag:
             self.bag[i]+=num
         else:
@@ -206,6 +217,12 @@ class player():
                 return True
         return False
 
+    def use(self,i):
+        if self.bag[i].use():
+            return True
+        else:
+            return False
+
 
 
 # a=player('a','ABCDEFG')
@@ -219,7 +236,7 @@ class player():
 # print(a.organ_stats('躯干'))
 
 class block():
-    def __init__(self,name,accessable,cate,hold=[]):
+    def __init__(self,name,cate,accessable=True,hold=[]):
         self.name=name
         #whether a block can be reached
         self.accessable=accessable
@@ -229,14 +246,14 @@ class block():
         self.hold=hold
 
 class world_block(block):
-    def __init__(self,name,accessable,hold=[]):
-        block.__init__(self,name,accessable,hold,cate='big')
+    def __init__(self,name,accessable=True,hold=[]):
+        block.__init__(self,name,'big',accessable=accessable,hold=hold)
 
 class map_block(block):
-    def __init__(self,name,accessable,hold=[]):
-        block.__init__(self,name,accessable,hold,cate='small')
+    def __init__(self,name,accessable=True,hold=[]):
+        block.__init__(self,name,'small',accessable=accessable,hold=hold)
 
-class map_grid():
+class grid():
     def __init__(self,length,cate):
         self.length=length
         #grid contains block
@@ -245,4 +262,28 @@ class map_grid():
     def get_block(self,x,y):
         if x<self.length and y<self.length:
             return self.grid[y][x]
-        return self.grid[0][0]
+        return False
+
+class map_grid(grid):
+    def __init__(self,length):
+        map_grid.__init__(self,length,cate='small')
+    def mov(self,character,x,y):
+        if self.get_block(x,y).accessable:
+            self.get_block(character.map_pos[0],character.map_pos[1]).hold.remove(character)
+            character.pos=[x,y]
+            self.get_block(x,y).hold+=character
+            return True
+        else:
+            return False
+
+class world_grid(grid):
+    def __init__(self,length):
+        map_grid.__init__(self,length,cate='big')
+    def mov(self,character,x,y):
+        if self.get_block(x,y).accessable:
+            self.get_block(character.world_pos[0],character.world_pos[1]).hold.remove(character)
+            character.world_pos=[x,y]
+            self.get_block(x,y).hold+=character
+            return True
+        else:
+            return False
