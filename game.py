@@ -1,5 +1,8 @@
 from random import *
 
+global item_dic
+item_dic={}
+
 def initial_stats():
     stats={}
     stats_name=['ATK','DEF','MAT','MDE','AGI','LUK']
@@ -182,8 +185,8 @@ class player():
     def bag_info(self):
         s=''
         for key in self.bag.keys():
-            if len(self.bag[key])>0:
-                s+='名称：'+key+'\n个数：'+str(len(self.bag[key]))+'\n'
+            if self.bag[key]>0:
+                s+='名称：'+key+'\n可用次数：'+str(self.bag[key])+'\n'
         if s=='':
             s='你没有任何物品'
         return s
@@ -209,11 +212,15 @@ class player():
             return False
 
     def add_item(self,i):
-        if i.name in self.bag:
-            self.bag[i.name]+=i
+        global item_dic
+        if i in item_dic.keys():
+            if i in self.bag.keys():
+                self.bag[i]+=item_dic[i].usage
+            else:
+                self.bag[i]=item_dic[i].usage
+            return True
         else:
-            self.bag[i.name]=[i]
-        return True
+            return False
 
     def equip(self,i,loc):
         if i in self.bag:
@@ -225,17 +232,21 @@ class player():
         return False
 
     def use(self,name):
-        if self.bag[name][0].use():
-            if 'hp' in self.bag[name][0].purpose.keys():
-                self.hp+=self.bag[name][0].purpose['hp']
-            if 'mp' in self.bag[name][0].purpose.keys():
-                self.mp+=self.bag[name][0].purpose['mp']
-            for key in self.bag[name][0].purpose.keys():
-                if key in self.stats.keys():
-                    self.stats[key]+=self.bag[name][0].purpose[key]
-            if self.bag[name][0].usage==0:
-                del self.bag[name][0]
-            return True
+        global item_dic
+        if name in self.bag.keys() and name in item_dic.keys():
+            thing=item_dic[name]
+            if self.bag[name]>0:
+                if 'hp' in thing.purpose.keys():
+                    self.hp+=thing.purpose['hp']
+                if 'mp' in thing.purpose.keys():
+                    self.mp+=thing.purpose['mp']
+                for key in thing.purpose.keys():
+                    if key in self.stats.keys():
+                        self.stats[key]+=thing.purpose[key]
+                self.bag[name]-=1
+                if self.bag[name]==0:
+                    del self.bag[name]
+                return True
         else:
             return False
 
@@ -244,7 +255,9 @@ class player():
 a=player('a','ABCDEFG')
 print(a.basic_info())
 medicine=buff_item('超级伤药',{'hp':100,'mp':100,'ATK':5})
-a.add_item(medicine)
+item_dic['超级伤药']=medicine
+a.add_item('超级伤药')
+a.add_item('超级伤药')
 print(a.bag_info())
 a.use('超级伤药')
 print(a.basic_info())
