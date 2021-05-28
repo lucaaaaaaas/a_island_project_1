@@ -208,15 +208,15 @@ class player():
 
 
 
-a=player('a','ABCDEFG')
-print(a.basic_info())
+# a=player('a','ABCDEFG')
+# print(a.basic_info())
+# # print(a.level_info())
+# # a.level=23
 # print(a.level_info())
-# a.level=23
-print(a.level_info())
-print(a.equipment_info())
-# print(type(a))
-print(a.wears['躯干'].getDescription())
-print(a.organ_stats('躯干'))
+# print(a.equipment_info())
+# # print(type(a))
+# print(a.wears['躯干'].getDescription())
+# print(a.organ_stats('躯干'))
 
 class block():
     def __init__(self,name,accessable,cate,hold=[]):
