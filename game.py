@@ -40,9 +40,14 @@ class item():
             s+='描述：'+self.description+'\n'
         return s 
 
+class buff_item(item):
+    def __init__(self,name,purpose,description='',usage=1):
+        item.__init__(self,name,description=description, usage=usage)
+        self.purpose=purpose
+
 class equipment(item):
     def __init__(self,name,stats,allow_list=[],ability={},description=''):
-        item.__init__(self,name,description,usage=-1)
+        item.__init__(self,name,description=description,usage=-1)
         self.stats=stats
         self.allow_list=allow_list
         self.ability=ability
@@ -177,8 +182,10 @@ class player():
     def bag_info(self):
         s=''
         for key in self.bag.keys():
-            if self.bag[key]>0:
-                s+='名称：'+key+'，个数：'+str(self.bag[key])+'\n'
+            if len(self.bag[key])>0:
+                s+='名称：'+key+'\n个数：'+str(len(self.bag[key]))+'\n'
+        if s=='':
+            s='你没有任何物品'
         return s
 
     def level_up(self):
@@ -201,11 +208,11 @@ class player():
         else:
             return False
 
-    def add_item(self,i,num=1):
-        if i in self.bag:
-            self.bag[i]+=num
+    def add_item(self,i):
+        if i.name in self.bag:
+            self.bag[i.name]+=i
         else:
-            self.bag[i]=num
+            self.bag[i.name]=[i]
         return True
 
     def equip(self,i,loc):
@@ -217,16 +224,31 @@ class player():
                 return True
         return False
 
-    def use(self,i):
-        if self.bag[i].use():
+    def use(self,name):
+        if self.bag[name][0].use():
+            if 'hp' in self.bag[name][0].purpose.keys():
+                self.hp+=self.bag[name][0].purpose['hp']
+            if 'mp' in self.bag[name][0].purpose.keys():
+                self.mp+=self.bag[name][0].purpose['mp']
+            for key in self.bag[name][0].purpose.keys():
+                if key in self.stats.keys():
+                    self.stats[key]+=self.bag[name][0].purpose[key]
+            if self.bag[name][0].usage==0:
+                del self.bag[name][0]
             return True
         else:
             return False
 
 
 
-# a=player('a','ABCDEFG')
-# print(a.basic_info())
+a=player('a','ABCDEFG')
+print(a.basic_info())
+medicine=buff_item('超级伤药',{'hp':100,'mp':100,'ATK':5})
+a.add_item(medicine)
+print(a.bag_info())
+a.use('超级伤药')
+print(a.basic_info())
+print(a.bag_info())
 # # print(a.level_info())
 # # a.level=23
 # print(a.level_info())
