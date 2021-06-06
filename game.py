@@ -1,7 +1,13 @@
 from random import *
 
+global player_dic
+player_dic={}
 global item_dic
 item_dic={}
+global skill_dic
+skill_dic={}
+global block_dic
+block_dic={}
 
 def initial_stats():
     stats={}
@@ -81,9 +87,57 @@ class weapon(equipment):
         s+='攻击方式：'+woa_dic[self.WOA]+'\n'
         return s   
 
+test_medicine=buff_item('超级伤药',{'HP':100,'MP':100,'ATK':5})
+item_dic['超级伤药']=test_medicine
+medicine00=buff_item('小红瓶',{'HP':50})
+item_dic['小红瓶']=medicine00
+medicine01=buff_item('红瓶',{'HP':100})
+item_dic['红瓶']=medicine01
+medicine02=buff_item('大红瓶',{'HP':200})
+item_dic['大红瓶']=medicine02
+medicine03=buff_item('超红瓶',{'HP':400})
+item_dic['超红瓶']=medicine03
+medicine04=buff_item('喝不下的红瓶',{'HP':9999})
+item_dic['喝不下的红瓶']=medicine04
+medicine05=buff_item('小蓝瓶',{'MP':25})
+item_dic['小蓝瓶']=medicine05
+medicine06=buff_item('蓝瓶',{'MP':50})
+item_dic['蓝瓶']=medicine06
+medicine07=buff_item('大蓝瓶',{'MP':100})
+item_dic['大蓝瓶']=medicine07
+medicine08=buff_item('超蓝瓶',{'MP':200})
+item_dic['超蓝瓶']=medicine08
+medicine09=buff_item('喝到吐的蓝瓶',{'MP':9999})
+item_dic['喝到吐的蓝瓶']=medicine09
+medicine10=buff_item('小紫瓶',{'HP':50,'MP':50})
+item_dic['小紫瓶']=medicine10
+medicine11=buff_item('紫瓶',{'HP':100,'MP':100})
+item_dic['紫瓶']=medicine11
+medicine12=buff_item('大紫瓶',{'HP':200,'MP':200})
+item_dic['大紫瓶']=medicine12
+medicine13=buff_item('超紫瓶',{'HP':400,'MP':400})
+item_dic['超紫瓶']=medicine13
+medicine14=buff_item('色素怼太多的紫瓶',{'HP':9999,'MP':9999})
+item_dic['色素怼太多的紫瓶']=medicine14
+medicine15=buff_item('祝福：力之金阁',{'ATK':2})
+item_dic['祝福：力之金阁']=medicine15
+medicine16=buff_item('祝福：技之银阁',{'MAT':2})
+item_dic['祝福：技之银阁']=medicine16
+medicine17=buff_item('祝福：动之铜阁',{'AGI':2})
+item_dic['祝福：动之铜阁']=medicine17
+medicine18=buff_item('祝福：守之铁阁',{'DEF':2})
+item_dic['祝福：守之铁阁']=medicine18
+medicine19=buff_item('祝福：深邃幻想',{'MDE':2})
+item_dic['祝福：深邃幻想']=medicine19
+medicine20=buff_item('祝福：自由热舞',{'LUK':2})
+item_dic['祝福：自由热舞']=medicine20
+medicine21=buff_item('祝福：王者祝福',{'ATK':2,'DEF':2,'MAT':2,'MDE':2,'AGI':2,'LUK':2})
+item_dic['祝福：王者祝福']=medicine21
+
 class organ():
-    def __init__(self,name,stats,endurance=10,existance=True):
+    def __init__(self,name,part,stats,endurance=10,existance=True):
         self.name=name
+        self.part=part
         self.stats=stats
         self.endurance=endurance
         self.existance=existance
@@ -96,8 +150,6 @@ class player():
     def __init__(self,name,cookie):
         self.name=name
         self.cookie=cookie
-        self.hp=100
-        self.mp=50
         self.level=1
         self.exp=0
         self.tp=0
@@ -113,31 +165,28 @@ class player():
         '内脏':None,
         '灵魂':None}
         #body parts of a player
-        self.body={'左臂':organ('左臂',{'ATK':1}),
-        '右臂':organ('右臂',{'ATK':1}),
-        '左腿':organ('左腿',{'AGI':1}),
-        '右腿':organ('右腿',{'AGI':1}),
-        '躯干':organ('躯干',{'DEF':2,'MDE':2}),
-        '头':organ('头',{'MAT':1,'ATK':1,'AGI':1}),
-        '内脏':organ('内脏',{'MAT':1,'DEF':1,'MDE':1}),
-        '灵魂':organ('灵魂',{'MAT':1,'LUK':3})}
+        self.body={'左臂':organ('左臂','左臂',{'ATK':0.1,'HP':0.5}),
+        '右臂':organ('右臂','右臂',{'ATK':0.1,'HP':0.5}),
+        '左腿':organ('左腿','左腿',{'AGI':0.1,'HP':0.5}),
+        '右腿':organ('右腿','右腿',{'AGI':0.1,'HP':0.5}),
+        '躯干':organ('躯干','躯干',{'DEF':0.2,'MDE':0.2,'HP':3}),
+        '头':organ('头','头',{'MAT':0.1,'ATK':0.1,'AGI':0.1,'HP':2,'MP':1.5}),
+        '内脏':organ('内脏','内脏',{'MAT':0.1,'DEF':0.1,'HP':2,'MDE':0.1}),
+        '灵魂':organ('灵魂','灵魂',{'MAT':0.1,'LUK':0.3,'MP':2.5})}
         self.stats=initial_stats()
+        self.stats['HP']=10
+        self.stats['MP']=10
         #position of a player
         self.map_pos=[0,0]
         #position of a player on a certain map
         self.world_pos=[0,0]
-    
-    def organ_stats(self,o):
-        s={}
-        if o in self.body:
-            for i in ['ATK','DEF','MAT','MDE','AGI','LUK']:
-                s[i]=self.body[o].stats.get(i,0)+self.wears[o].stats.get(i,0)
-        return s
+        self.is_dead=False
+        self.skills=[]
 
     def cal_stats(self,s):
         value=self.stats[s]
         for i in ['左臂','右臂','左腿','右腿','躯干','头','内脏','灵魂']:
-            value+=self.body[i].stats.get(s,0)
+            value+=self.body[i].stats.get(s,0)*self.body[i].endurance
             if self.wears[i]!=None:
                 value+=self.wears[i].stats.get(s,0)
         return value
@@ -146,10 +195,8 @@ class player():
         s=''
         s+='姓名：'+self.name+'\n'
         s+='饼干：'+self.cookie+'\n'
-        s+='HP：'+str(self.hp)+'\n'
-        s+='MP：'+str(self.mp)+'\n'
         s+='等级：'+str(self.level)+'\n'
-        for i in ['ATK','DEF','MAT','MDE','AGI','LUK']:
+        for i in self.stats.keys():
             s+=i+'：'+str(self.cal_stats(i))+'\n'
         return s
     
@@ -172,6 +219,12 @@ class player():
         part_name=['左臂','右臂','左腿','右腿','躯干','头','内脏','灵魂']
         for i in part_name:
             self.body[i].check()
+        # if self.hp>self.maxhp:
+        #     self.hp=self.maxhp
+        # if self.mp>self.maxmp:
+        #     self.mp=self.maxmp
+        if self.stats['HP']<=0:
+            self.is_dead=True
 
     def level_info(self):
         s=''
@@ -236,10 +289,6 @@ class player():
         if name in self.bag.keys() and name in item_dic.keys():
             thing=item_dic[name]
             if self.bag[name]>0:
-                if 'hp' in thing.purpose.keys():
-                    self.hp+=thing.purpose['hp']
-                if 'mp' in thing.purpose.keys():
-                    self.mp+=thing.purpose['mp']
                 for key in thing.purpose.keys():
                     if key in self.stats.keys():
                         self.stats[key]+=thing.purpose[key]
@@ -250,12 +299,40 @@ class player():
         else:
             return False
 
+    def apply(self,sk,to=None):
+        global player_dic
+        global skill_dic
+        if sk in self.skills:
+            if sk in skill_dic:
+                if to==None or to in player_dic:
+                    #should be a function
+                    if skill_dic[sk](self,to):
+                        if to in player_dic:
+                            to.check()
+                        return '成功'
+                    return '无效的操作'
+                return '无效的对象'
+            return '此技能不存在'
+        return '你并不拥有此技能'
+
+def create_player(name,cookie):
+    global player_dic
+    a=player(name,cookie)
+    player_dic[cookie]=a
+
+def damage(a,b):
+    b.stats['HP']-=100
+    return True
+
+def hurt(a,b):
+    for i in b.body:
+        i.endurance-=1
+    return True
 
 
-a=player('a','ABCDEFG')
+create_player('a','ABCDEFG')
+a=player_dic['ABCDEFG']
 print(a.basic_info())
-medicine=buff_item('超级伤药',{'hp':100,'mp':100,'ATK':5})
-item_dic['超级伤药']=medicine
 a.add_item('超级伤药')
 a.add_item('超级伤药')
 print(a.bag_info())
